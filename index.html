@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>4D Rotations with Paired Quaternions - three.js</title>
+  <style>
+    html, body { height: 100%; margin: 0; background:#0b0f14; color:#c9d1d9; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif; }
+    #info { position: fixed; left: 12px; top: 12px; padding: 10px 12px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; backdrop-filter: blur(6px); z-index:10; }
+    #info a { color:#58a6ff; text-decoration: none; }
+    canvas { display:block; }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <div><strong>4D rotation via paired quaternions</strong></div>
+    <div>q' = a · q · b* (|a|=|b|=1)</div>
+    <div>Choose shape & parameters in the GUI (top-right).</div>
+  </div>
+
+  <!-- three.js -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <!-- lil-gui (tiny GUI library) -->
+  <script src="https://unpkg.com/lil-gui@0.19/dist/lil-gui.umd.js"></script>
+
+  <!-- App code -->
+<script type="module" src="./app-projection-toggle.js"></script>
+</body>
+</html>
+
