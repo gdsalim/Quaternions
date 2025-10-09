@@ -1,7 +1,8 @@
-// App with projection toggle: 'W-Perspective' and 'Stereographic S^3'
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import GUI from 'https://unpkg.com/lil-gui@0.19/dist/lil-gui.esm.js';
-import { projectStereographic } from './projection-stereographic.js';
+import * as THREE from 'three';
+import GUI from 'lil-gui';
+import { projectStereographic } from './projections/projection-stereographic.js';
+import { gen24Cell } from './shapes/duo_24cell.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // ---------- Quaternion helpers ----------
 function qMul(a, b){
@@ -13,7 +14,9 @@ function qMul(a, b){
   };
 }
 function qConj(q){ return { w:q.w, x:-q.x, y:-q.y, z:-q.z }; }
+
 function qNormalize(q){ const n=Math.hypot(q.w,q.x,q.y,q.z)||1; return {w:q.w/n,x:q.x/n,y:q.y/n,z:q.z/n}; }
+
 function qFromAxisAngle(axis, angle){
   const [x,y,z] = axis; const h = angle*0.5; const s = Math.sin(h);
   const len = Math.hypot(x,y,z) || 1; return qNormalize({ w: Math.cos(h), x: s*x/len, y: s*y/len, z: s*z/len });
@@ -59,6 +62,7 @@ const SHAPES = {
   'Tesseract (8-cell)': genTesseract,
   'Orthoplex (16-cell)': genOrthoplex,
   'Simplex (5-cell)': genSimplex,
+  '24-cell': gen24Cell,
 };
 
 // ---------- three.js scene ----------
@@ -74,6 +78,11 @@ const grid = new THREE.GridHelper(8, 16, 0x223344, 0x223344);
 grid.rotation.x = Math.PI/2; grid.position.z = -2.5; scene.add(grid);
 // light
 const light = new THREE.AmbientLight(0xffffff, 0.9); scene.add(light);
+
+// 3d Orbit Control
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.enabled = false; // off by default; we’ll toggle via GUI
 
 let lineGeom = new THREE.BufferGeometry();
 let lineMat  = new THREE.LineBasicMaterial({ color: 0x8ab4f8 });
@@ -114,7 +123,7 @@ const params = {
   vertexColor: '#ffffff',
   mode: 'Auto',       // 'Auto' | 'Manual'
   angleA: 0,          // degrees of rotation, only used in Manual
-  angleB: 0           // degrees of rotation only used in Manual
+  angleB: 0,           // degrees of rotation only used in Manual
 };
 
 function allocateBuffers(){
@@ -270,5 +279,13 @@ buildShape();
 lines.material.color.set(params.edgeColor);
 points.material.color.set(params.vertexColor);
 
-function loop(){ update(); renderer.render(scene, camera); requestAnimationFrame(loop); }
+function loop(){ 
+  if (controls.enabled) controls.update();
+  update(); renderer.render(scene, camera); requestAnimationFrame(loop); 
+}
 loop();
+
+//--------------Orbit Mode----------------
+params.orbit3D = false;
+const fOrbitMode = gui.addFolder('Orbit Mode');
+fOrbitMode.add(params, 'orbit3D').name('3D Mouse Orbit').onChange(v => { controls.enabled = v; });
